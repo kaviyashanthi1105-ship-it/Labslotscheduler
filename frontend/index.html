@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lab Slot Scheduler - Rosie</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f4f4f4; }
+        .box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        input, button { padding: 10px; margin: 5px; }
+        button { background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Lab Slot Scheduler - CSE Lab</h1>
+    <div class="box">
+        <h3>Book New Slot</h3>
+        <input id="lab" placeholder="Lab Name (e.g. CSE Lab 1)">
+        <input id="date" type="date">
+        <input id="time" placeholder="Time (e.g. 9-11 AM)">
+        <input id="name" placeholder="Booked By">
+        <select id="status">
+            <option>Available</option>
+            <option>Booked</option>
+        </select>
+        <button onclick="createSlot()">Book Slot</button>
+    </div>
+    <div class="box">
+        <button onclick="loadSlots()">View All Slots</button>
+        <button onclick="loadAnalytics()">Show Analytics</button>
+        <div id="result"></div>
+        <table id="slotTable"></table>
+    </div>
+<script>
+const API = "http://127.0.0.1:8000";
+async function createSlot(){
+    const data = {
+        lab_name: document.getElementById('lab').value,
+        slot_date: document.getElementById('date').value,
+        slot_time: document.getElementById('time').value,
+        booked_by: document.getElementById('name').value,
+        status: document.getElementById('status').value
+    };
+    let res = await fetch(API+"/slots", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data)});
+    alert("Slot Booked!");
+    loadSlots();
+}
+async function loadSlots(){
+    let res = await fetch(API+"/slots");
+    let slots = await res.json();
+    let html="<tr><th>ID</th><th>Lab</th><th>Date</th><th>Time</th><th>Booked By</th><th>Status</th></tr>";
+    slots.forEach(s=>{
+        html+=`<tr><td>${s.id}</td><td>${s.lab_name}</td><td>${s.slot_date}</td><td>${s.slot_time}</td><td>${s.booked_by}</td><td>${s.status}</td></tr>`;
+    });
+    document.getElementById('slotTable').innerHTML=html;
+}
+async function loadAnalytics(){
+    let res = await fetch(API+"/analytics");
+    let a = await res.json();
+    document.getElementById('result').innerHTML=`Total: ${a.total} | Available: ${a.available} | Booked: ${a.booked}`;
+}
+</script>
+</body>
+</html>
